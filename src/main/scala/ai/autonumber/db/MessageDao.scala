@@ -45,7 +45,7 @@ object MessageDao {
   }
 
   def getNewMessagesThen(lastMessageId: String): List[ChatMessage] = {
-    val query: String = "SELECT id, text, user_Id, time FROM xgb_autonumber.chatMessage where id > '" + lastMessageId + "'"
+    val query: String = "SELECT id, text, user_Id, time FROM xgb_autonumber.chatMessage where id > '" + lastMessageId + "' LIMIT 10"
     val resultSet: ResultSet = DatabaseUtils.executeQuery(query)
     var result: List[ChatMessage] = List.empty
     try {

@@ -36,7 +36,7 @@ class ChatService extends AutoNumberService {
         CommunicationHelper.getInstance.sendMessageTo(devices.asJava, chatMessage)
       }
     } else {
-      val lastMessageId: String = paramValue(request, "lastMsgId")
+      val lastMessageId: String = if(params(request).contains("lastMsgId")) paramValue(request, "lastMsgId") else "-1"
       val messages: List[ChatMessage] = MessageDao.getNewMessagesThen(lastMessageId)
       val users: List[User] = UserDao.getUsers
       for (chatMessage <- messages) {
