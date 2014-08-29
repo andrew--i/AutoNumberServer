@@ -18,6 +18,7 @@ object DatabaseUtils {
     dataSource.setDriverClassName("org.postgresql.Driver")
     dataSource.setUrl(dbUrl)
     dataSource.setUsername(user)
+    dataSource.setPassword(password)
     dataSource.setInitialSize(3)
     dataSource
   }
