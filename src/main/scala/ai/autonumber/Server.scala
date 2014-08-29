@@ -1,6 +1,6 @@
 package ai.autonumber
 
-import ai.autonumber.service.HomeService
+import ai.autonumber.service.{HomeService, RegisterService}
 import com.twitter.finagle.http.Response
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.{Await, Future}
@@ -20,21 +20,33 @@ object Server {
 
 class AutoNumberService extends Service[HttpRequest, HttpResponse] {
 
-  val handlers = List(new HomeService())
+  val handlers = List(new HomeService(), new RegisterService())
+
 
   def apply(request: HttpRequest): Future[HttpResponse] = {
-    val uri: String = request.getUri
-    for (service <- handlers) {
-      if (uri.endsWith(service.requestUrl))
-        return service.processRequest(request)
+
+    try {
+      for (service <- handlers) {
+        if (service.isRequestMatches(request))
+          return service.processRequest(request)
+      }
+    } catch {
+      case e: Exception => return badRequestResponse(e)
     }
-    resourceNotFoundResponsse(request)
+    resourceNotFoundResponse(request)
   }
 
-  def resourceNotFoundResponsse(request: HttpRequest): Future[HttpResponse] = {
+  def resourceNotFoundResponse(request: HttpRequest): Future[HttpResponse] = {
     val response = Response()
     response.setStatusCode(404)
     response.setContentString("Resource does not exist")
+    Future(response)
+  }
+
+  def badRequestResponse(value: Exception) = {
+    val response = Response()
+    response.setStatusCode(400)
+    response.setContentString(value.getMessage)
     Future(response)
   }
 }

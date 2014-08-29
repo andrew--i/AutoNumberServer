@@ -1,6 +1,6 @@
 package ai.autonumber.db
 
-import java.sql.{SQLException, ResultSet}
+import java.sql.{ResultSet, SQLException}
 
 import ai.autonumber.domain.User
 

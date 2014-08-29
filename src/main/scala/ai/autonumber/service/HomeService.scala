@@ -4,13 +4,12 @@ import ai.autonumber.db.UserDao
 import ai.autonumber.domain.User
 import com.twitter.finagle.http.Response
 import com.twitter.util.Future
-import org.jboss.netty.handler.codec.http.{HttpResponse, HttpRequest}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-/**
- * Created by Andrew on 29.08.2014.
- */
-class HomeService extends Service {
-  override val requestUrl: String = "/"
+
+class HomeService extends AutoNumberService {
+
+  override protected def isUriMatches(uri: String): Boolean = uri.equalsIgnoreCase("/")
 
   override def processRequest(request: HttpRequest): Future[HttpResponse] = {
     val response = Response()
