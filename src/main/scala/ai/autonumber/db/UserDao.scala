@@ -1,6 +1,6 @@
 package ai.autonumber.db
 
-import java.sql.{ResultSet, SQLException}
+import java.sql.ResultSet
 
 import ai.autonumber.domain.User
 
@@ -35,63 +35,29 @@ object UserDao {
     DatabaseUtils.execute(query)
   }
 
+  def userMarchaller(resultSet: ResultSet): List[User] = {
+    var result: List[User] = List.empty
+    while (resultSet.next) {
+      val user: User = new User
+      user.setId(resultSet.getString(1))
+      user.setName(resultSet.getString(2))
+      user.setRegId(resultSet.getString(3))
+      result = result ++ List(user)
+    }
+    result
+  }
+
   /**
    * Gets all registered devices.
    */
   def getUsers: List[User] = {
     val query: String = "SELECT id, name, reg_Id FROM xgb_autonumber.user"
-    val resultSet: ResultSet = DatabaseUtils.executeQuery(query)
-    var result: List[User] = List.empty
-    try {
-      while (resultSet.next) {
-        val user: User = new User
-        user.setId(resultSet.getString(1))
-        user.setName(resultSet.getString(2))
-        user.setRegId(resultSet.getString(3))
-        result = result ++ List(user)
-      }
-    }
-    catch {
-      case e: SQLException =>
-        e.printStackTrace()
-    }
-    finally {
-      try {
-        resultSet.close()
-      }
-      catch {
-        case e: SQLException =>
-          e.printStackTrace()
-      }
-    }
-    result
+    DatabaseUtils.executeQuery(query, List.empty, userMarchaller)
   }
 
   def findUserByRegId(regId: String): User = {
     val query: String = "SELECT id, name, reg_Id FROM xgb_autonumber.user where reg_id ='" + regId + "'"
-    val resultSet: ResultSet = DatabaseUtils.executeQuery(query)
-    try {
-      if (resultSet.next) {
-        val user: User = new User
-        user.setId(resultSet.getString(1))
-        user.setName(resultSet.getString(2))
-        user.setRegId(resultSet.getString(3))
-        return user
-      }
-    }
-    catch {
-      case e: SQLException =>
-        e.printStackTrace()
-    }
-    finally {
-      try {
-        resultSet.close()
-      }
-      catch {
-        case e: SQLException =>
-          e.printStackTrace()
-      }
-    }
-    null
+    val users: List[User] = DatabaseUtils.executeQuery(query, List.empty, userMarchaller)
+    if (users.isEmpty) null else users(0)
   }
 }

@@ -2,6 +2,8 @@ package ai.autonumber.db
 
 import java.sql._
 
+import org.apache.commons.dbcp2.BasicDataSource
+
 /**
  * Created by Andrew on 29.08.2014.
  */
@@ -11,32 +13,60 @@ object DatabaseUtils {
   private final val password: String = "91d85239ps"
 
 
-  private def connection: Connection = {
-    DriverManager.getConnection(dbUrl, user, password)
+  lazy val dataSource: BasicDataSource = {
+    val dataSource: BasicDataSource = new BasicDataSource()
+    dataSource.setDriverClassName("org.postgresql.Driver")
+    dataSource.setUrl(dbUrl)
+    dataSource.setUsername(user)
+    dataSource.setInitialSize(3)
+    dataSource
   }
 
-  def executeQuery(query: String): ResultSet = {
+  def executeQuery[T](query: String, elseValue: T, marshaller: ResultSet => T): T = {
+    var connection: Connection = null
+    var statement: Statement = null
+    var resultSet: ResultSet = null
     try {
-      val statement: Statement = connection.createStatement()
-      return statement.executeQuery(query)
+      connection = dataSource.getConnection
+      statement = connection.createStatement()
+      resultSet = statement.executeQuery(query)
+      return marshaller(resultSet)
     }
     catch {
       case e: SQLException =>
         e.printStackTrace()
+    } finally {
+      connection.close()
+      statement.close()
+      resultSet.close()
     }
-    null
+    elseValue
   }
 
-  def execute(query: String): Boolean = {
+  def execute[T](query: String): Boolean = {
+    var connection: Connection = null
+    var statement: Statement = null
+    var resultSet: ResultSet = null
     try {
-      val statement: Statement = connection.createStatement()
+      connection = dataSource.getConnection
+      statement = connection.createStatement()
       return statement.execute(query)
     }
     catch {
       case e: SQLException =>
         e.printStackTrace()
+    } finally {
+      connection.close()
+      statement.close()
     }
     false
   }
+}
+
+
+abstract class EntityMarshaller[T](query: String) {
+  def marshall(r: ResultSet): T
+
+  val elseValue: T
 }
 
