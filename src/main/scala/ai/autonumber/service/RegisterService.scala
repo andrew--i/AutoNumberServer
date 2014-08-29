@@ -14,7 +14,7 @@ class RegisterService extends AutoNumberService {
     if (request.getUri.contains("/unregister")) {
       UserDao.unregister(regId);
     } else {
-      val userName: String = paramValue(request, "userName")
+      val userName: String = paramValue(request, "user")
       UserDao.register(regId, userName)
     }
     successResponse()
