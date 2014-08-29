@@ -1,8 +1,10 @@
 package ai.autonumber.service
 
+import java.nio.charset.Charset
+
 import com.twitter.finagle.http.Response
 import com.twitter.util.Future
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpMethod, HttpRequest, HttpResponse}
 
 
 abstract class AutoNumberService {
@@ -23,11 +25,17 @@ abstract class AutoNumberService {
   }
 
   def params(request: HttpRequest): Map[String, String] = {
-    val uri: String = request.getUri
-    if (!uri.contains("?"))
-      return Map.empty
-    val params: String = uri.substring(uri.indexOf("?") + 1)
-    params.split("&").map(s => s.split("=")).map(r => r(0) -> r(1)).foldLeft(Map.empty[String, String]) { (m, k) => m ++ Map(k)}
+    if (request.getMethod == HttpMethod.GET) {
+      val uri: String = request.getUri
+      if (!uri.contains("?"))
+        return Map.empty
+      val params: String = uri.substring(uri.indexOf("?") + 1)
+      params.split("&").map(s => s.split("=")).map(r => r(0) -> r(1)).foldLeft(Map.empty[String, String]) { (m, k) => m ++ Map(k)}
+    } else {
+      val bytes: Array[Byte] = request.getContent.array()
+      val params: String = new String(bytes, Charset.forName("utf-8"))
+      params.split("&").map(s => s.split("=")).map(r => r(0) -> r(1)).foldLeft(Map.empty[String, String]) { (m, k) => m ++ Map(k)}
+    }
   }
 
   def paramValue(request: HttpRequest, paramName: String): String = {
