@@ -23,9 +23,9 @@ object Server {
 class Hello extends Service[HttpRequest, HttpResponse] {
   def apply(request: HttpRequest): Future[HttpResponse] = {
     if (request.getUri.endsWith("/db")) {
-      showDatabase(request);
+      showDatabase(request)
     } else {
-      showHome(request);
+      showHome(request)
     }
   }
 
@@ -37,7 +37,7 @@ class Hello extends Service[HttpRequest, HttpResponse] {
   }
 
   def showDatabase(request: HttpRequest): Future[HttpResponse] = {
-    val connection = getConnection
+    val connection = getConnection()
     val stmt = connection.createStatement
     stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)")
     stmt.executeUpdate("INSERT INTO ticks VALUES (now())")

@@ -2,7 +2,7 @@ import NativePackagerKeys._
 
 packageArchetype.java_application
 
-name := """scala-getting-started"""
+name := """auto-number"""
 
 version := "1.0"
 
