@@ -1,6 +1,6 @@
 package ai.autonumber
 
-import ai.autonumber.service.{HomeService, RegisterService}
+import ai.autonumber.service.{ChatService, HomeService, RegisterService}
 import com.twitter.finagle.http.Response
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.{Await, Future}
@@ -20,7 +20,7 @@ object Server {
 
 class AutoNumberService extends Service[HttpRequest, HttpResponse] {
 
-  val handlers = List(new HomeService(), new RegisterService())
+  val handlers = List(new HomeService(), new RegisterService(), new ChatService())
 
 
   def apply(request: HttpRequest): Future[HttpResponse] = {
