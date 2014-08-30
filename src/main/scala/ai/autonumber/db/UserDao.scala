@@ -2,7 +2,7 @@ package ai.autonumber.db
 
 import java.sql.ResultSet
 
-import ai.autonumber.domain.User
+import ai.autonumber.domain.domain.User
 
 /**
  * Created by Andrew on 29.08.2014.
@@ -35,13 +35,10 @@ object UserDao {
     DatabaseUtils.execute(query)
   }
 
-  def userMarchaller(resultSet: ResultSet): List[User] = {
+  def userMarshaller(resultSet: ResultSet): List[User] = {
     var result: List[User] = List.empty
     while (resultSet.next) {
-      val user: User = new User
-      user.setId(resultSet.getString(1))
-      user.setName(resultSet.getString(2))
-      user.setRegId(resultSet.getString(3))
+      val user: User = new User(resultSet.getString(1), resultSet.getString(3), resultSet.getString(2), "")
       result = result ++ List(user)
     }
     result
@@ -52,12 +49,12 @@ object UserDao {
    */
   def getUsers: List[User] = {
     val query: String = "SELECT id, name, reg_Id FROM xgb_autonumber.user"
-    DatabaseUtils.executeQuery(query, List.empty, userMarchaller)
+    DatabaseUtils.executeQuery(query, List.empty, userMarshaller)
   }
 
   def findUserByRegId(regId: String): User = {
     val query: String = "SELECT id, name, reg_Id FROM xgb_autonumber.user where reg_id ='" + regId + "'"
-    val users: List[User] = DatabaseUtils.executeQuery(query, List.empty, userMarchaller)
+    val users: List[User] = DatabaseUtils.executeQuery(query, List.empty, userMarshaller)
     if (users.isEmpty) null else users(0)
   }
 }

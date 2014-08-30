@@ -2,12 +2,12 @@ package ai.autonumber.db
 
 import java.sql.ResultSet
 
-import ai.autonumber.domain.ChatMessage
+import ai.autonumber.domain.domain.ChatMessage
 
 /**
  * Created by Andrew on 29.08.2014.
  */
-object MessageDao {
+object ChatMessageDao {
   def addUserMessage(userId: String, message: String) {
     println("Registering chat message " + message + " from " + userId)
     val query: String = "INSERT INTO xgb_autonumber.chatmessage (text,user_id) VALUES('" + message + "','" + userId + "')"
@@ -18,11 +18,7 @@ object MessageDao {
   def chatMessageMarshaller(resultSet: ResultSet): List[ChatMessage] = {
     var result: List[ChatMessage] = List.empty
     while (resultSet.next) {
-      val chatMessage: ChatMessage = new ChatMessage
-      chatMessage.setMessageId(resultSet.getString(1))
-      chatMessage.setText(resultSet.getString(2))
-      chatMessage.setUserId(resultSet.getString(3))
-      chatMessage.setTime(resultSet.getString(4))
+      val chatMessage: ChatMessage = new ChatMessage(resultSet.getString(3), resultSet.getString(2), resultSet.getString(1), resultSet.getString(4), "")
       result = result ++ List(chatMessage)
     }
     result

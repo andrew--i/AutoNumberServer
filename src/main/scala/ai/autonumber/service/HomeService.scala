@@ -1,7 +1,8 @@
 package ai.autonumber.service
 
 import ai.autonumber.db.UserDao
-import ai.autonumber.domain.User
+import ai.autonumber.domain.domain.User
+
 import com.twitter.finagle.http.Response
 import com.twitter.util.Future
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -25,7 +26,7 @@ class HomeService extends AutoNumberService {
       content = content + "<ul>"
       for (user <- users) {
         content = content + "<li>"
-        content = content + user.getName + "( " + user.getRegId + ")"
+        content = content + user.name + "( " + user.regId + ")"
         content = content + "</li>"
       }
       content = content + "</ul>"

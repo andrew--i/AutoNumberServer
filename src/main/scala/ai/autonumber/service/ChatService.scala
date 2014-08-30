@@ -1,7 +1,7 @@
 package ai.autonumber.service
 
-import ai.autonumber.db.{MessageDao, UserDao}
-import ai.autonumber.domain.{ChatMessage, User}
+import ai.autonumber.db.{ChatMessageDao, UserDao}
+import ai.autonumber.domain.domain.{ChatMessage, User}
 import ai.autonumber.gcm.CommunicationHelper
 import ai.autonumber.gcm.model.Message
 import com.twitter.util.Future
@@ -20,28 +20,25 @@ class ChatService extends AutoNumberService {
       val msg: String = paramValue(request, "msg")
       val user: User = UserDao.findUserByRegId(regId)
       if (user != null) {
-        MessageDao.addUserMessage(user.getId, msg)
-        val lastMessage: ChatMessage = MessageDao.getLastMessage(user.getId)
+        ChatMessageDao.addUserMessage(user.id, msg)
+        var lastMessage: ChatMessage = ChatMessageDao.getLastMessage(user.id)
 
         val users: List[User] = UserDao.getUsers
 
-        users.find(u => lastMessage.getUserId.equalsIgnoreCase(u.getId)) match {
-          case Some(u) => lastMessage.setUserName(u.getName)
-          case None =>
-        }
+        val userName = getUserNameOfMessage(lastMessage, users)
+        lastMessage = ChatMessage(lastMessage, userName)
         val value: String = lastMessage.toJson
         val encodeBytes: String = Base64.encodeBytes(value.getBytes)
         val chatMessage: Message = new Message.Builder().addData("chat-message", encodeBytes).build
-        val devices: List[String] = users.map(u => u.getRegId)
+        val devices: List[String] = users.map(u => u.regId)
         CommunicationHelper.getInstance.sendMessageTo(devices.asJava, chatMessage)
       }
     } else {
-      val lastMessageId: String = if(params(request).contains("lastMsgId")) paramValue(request, "lastMsgId") else "-1"
-      val messages: List[ChatMessage] = MessageDao.getNewMessagesThen(lastMessageId)
+      val lastMessageId: String = if (params(request).contains("lastMsgId")) paramValue(request, "lastMsgId") else "-1"
+      val messages: List[ChatMessage] = ChatMessageDao.getNewMessagesThen(lastMessageId)
       val users: List[User] = UserDao.getUsers
       for (chatMessage <- messages) {
-        chatMessage.setUserName(getUserNameOfMessage(chatMessage, users))
-        val value: String = chatMessage.toJson
+        val value: String = ChatMessage(chatMessage, getUserNameOfMessage(chatMessage, users)).toJson
         val message: Message = new Message.Builder().addData("chat-message", Base64.encodeBytes(value.getBytes)).build
         CommunicationHelper.getInstance.sendMessageTo(regId, message)
       }
@@ -51,8 +48,8 @@ class ChatService extends AutoNumberService {
 
   private def getUserNameOfMessage(chatMessage: ChatMessage, users: List[User]): String = {
     for (user <- users) {
-      if (chatMessage.getUserId.equalsIgnoreCase(user.getId))
-        return user.getName
+      if (chatMessage.userId.equalsIgnoreCase(user.id))
+        return user.name
     }
     null
   }
