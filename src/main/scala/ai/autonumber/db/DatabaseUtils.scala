@@ -47,7 +47,6 @@ object DatabaseUtils {
   def execute[T](query: String): Boolean = {
     var connection: Connection = null
     var statement: Statement = null
-    var resultSet: ResultSet = null
     try {
       connection = dataSource.getConnection
       statement = connection.createStatement()
